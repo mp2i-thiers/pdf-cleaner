@@ -1,3 +1,5 @@
+import shutil
+
 import fitz  # PyMuPDF
 from PIL import Image, ImageChops
 
@@ -10,6 +12,9 @@ from PIL import Image, ImageChops
 def clean_pdf(input_pdf: str, output_pdf: str):
     # Load the PDF
     doc = fitz.open(input_pdf)
+    if len(doc) < 8:
+        shutil.copy2(input_pdf, output_pdf)
+        return
 
     # page_number_area: valeurs arbitraires pour récupérer le numéro de page en bas à droite
     def get_page_number_region(image, page_number_area=(0.9, 0.97, 1, 1)):
@@ -50,6 +55,10 @@ def clean_pdf(input_pdf: str, output_pdf: str):
             previous_page_number_region = current_page_number_region
 
     # On enregistre aussi la dernière page si elle n'est pas déjà dans la liste
+    if not final_pages:
+        shutil.copy2(input_pdf, output_pdf)
+        return
+
     if len(doc) - 1 not in final_pages:
         final_pages.append(len(doc) - 1)
 
